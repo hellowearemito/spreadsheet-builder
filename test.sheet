@@ -1,0 +1,65 @@
+
+:custom {
+  bold,
+  align("center"),
+  align("verticalcenter"),
+  border("none"),
+  background_color("#ffffff"),
+  color($red),
+  font_name("Arial")
+}
+
+:bordered {
+  border("thin"),
+  border_bottom_color("#00ff00")
+}
+
+:gray {
+  background_color("#a0a0a0")
+}
+
+sheet("name")
+
+col(0, 0, chars(15))
+col(1, 1, pixels(100))
+
+row(0, pixels(100))
+
+anchor(@one)
+
+[ img("cc-logo.png", embed) ]
+
+move(1,2) /* relative: row, col */
+move(@one,2,3) /* anchor-relative: row, col */
+
+[ str("ID\"s", :custom), num("Name", :bordered), str(1.27), date("2024-04-01T02:03:04", colspan(2))]
+[ num(123), num(1.27), num(1.27 * 2), str(1.27 + "%") ]
+[ num( 1 + 2 * 2 + (1 + 3) * 2 ) ]
+
+cr
+
+[ str($dict.inner, rowspan(2)), str($arr.0), str($arr.1), str($arr.2) ]
+
+/* autofit */
+
+sheet("second")
+
+[ num(123), num(1.27, colspan(2)), num($sample, :gray) ]
+
+[ str("Array length:"), num($arr + 0.0) ]
+
+for $val in $arr {
+  [ str("Row", colspan(2)), str($val) ]
+}
+
+/* autofit */
+
+/*
+for $user in $users {
+
+  [ num($user.id) ]
+  [ num($user.id, :custom), str($user.name), date($user.created) ]
+  [ num($user.id, :custom, colspan(2), rowspan(3)), str($user.name), date($user.created) ] 
+
+}
+*/
