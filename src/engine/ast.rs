@@ -127,7 +127,7 @@ pub struct RowSpec<'a> {
     pub height: f64,
 }
 
-impl<'a> Expression<'a> {
+impl Expression<'_> {
     pub fn as_str(&self) -> String {
         match self {
             Expression::Value(v) => v.as_str(),
@@ -143,7 +143,7 @@ impl<'a> Expression<'a> {
     }
 }
 
-impl<'a> Expr<'a> {
+impl Expr<'_> {
     pub fn as_str(&self) -> String {
         match self {
             Expr::Primary(v) => v.as_str(),

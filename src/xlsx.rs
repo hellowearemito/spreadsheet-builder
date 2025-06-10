@@ -180,14 +180,19 @@ impl XlsxWriter {
                             )?;
                         }
                     }
-                    CellType::Date => {
-                        sheet.write_with_format(
-                            self.row,
-                            self.col,
-                            ExcelDateTime::parse_from_str(&cell.value.as_str())?,
-                            format,
-                        )?;
-                    }
+                    CellType::Date => match ExcelDateTime::parse_from_str(&cell.value.as_str()) {
+                        Ok(date) => {
+                            sheet.write_with_format(self.row, self.col, date, format)?;
+                        }
+                        Err(_e) => {
+                            sheet.write_string_with_format(
+                                self.row,
+                                self.col,
+                                cell.value.as_str(),
+                                format,
+                            )?;
+                        }
+                    },
                     CellType::Image => {
                         let image_mode = cell.image_mode.unwrap_or("embed");
                         let image = Image::new(cell.value.as_str())?;

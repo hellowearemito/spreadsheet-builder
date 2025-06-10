@@ -52,6 +52,8 @@ for $val in $arr {
   [ str("Row", colspan(2)), str($val) ]
 }
 
+[ str("Wrong date:"), date($bad) ]
+
 /* autofit */
 
 /*

@@ -29,6 +29,10 @@ fn main() {
             );
             vm.scopes.top.define("dict", dict);
             vm.scopes.top.define("arr", arr);
+            vm.scopes.top.define(
+                "bad",
+                spreadsheet_builder::engine::scope::Value::String(String::from("sdfsd")),
+            );
             let mut writer = spreadsheet_builder::xlsx::XlsxWriter::default();
             let res = vm.run(&tree.elements, &mut writer);
             match res {

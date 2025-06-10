@@ -91,7 +91,7 @@ impl Value {
             Value::String(lhs) => match rhs {
                 Value::Integer(rhs) => Ok(Value::String(lhs.to_string() + &rhs.to_string())),
                 Value::Float(rhs) => Ok(Value::String(lhs.to_string() + &rhs.to_string())),
-                Value::String(rhs) => Ok(Value::String(lhs.to_string() + &rhs)),
+                Value::String(rhs) => Ok(Value::String(lhs.to_string() + rhs)),
                 Value::Array(_) => Err(SpreadSheetError::new(
                     "invalid operation: string + array".to_string(),
                 )),
@@ -403,10 +403,7 @@ impl Scope {
 
     /// Try to access a variable mutably.
     pub fn get_mut(&mut self, var: &str) -> Option<SpreadSheetResult<&mut Value>> {
-        self.map
-            .get_mut(var)
-            .map(Slot::write)
-            .map(|res| res.map_err(SpreadSheetError::from))
+        self.map.get_mut(var).map(Slot::write)
     }
 
     /// Iterate over all definitions.
