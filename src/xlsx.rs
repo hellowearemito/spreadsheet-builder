@@ -206,6 +206,14 @@ impl XlsxWriter {
                             _ => {}
                         }
                     }
+                    CellType::Bool => {
+                        sheet.write_string_with_format(
+                            self.row,
+                            self.col,
+                            cell.value.as_str(),
+                            format,
+                        )?;
+                    }
                 }
                 self.col += cell.colspan;
             }

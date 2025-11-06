@@ -34,6 +34,7 @@ impl Value {
             Value::String(s) => String::from(s),
             Value::Float(f) => f.to_string(),
             Value::Integer(i) => i.to_string(),
+            Value::Boolean(b) => b.to_string(),
             _ => String::from(""),
         }
     }
@@ -479,7 +480,7 @@ impl<'a> Iterator for PathSplitter<'a> {
 }
 
 impl PathSplitter<'_> {
-    pub fn new(path: &str) -> PathSplitter {
+    pub fn new(path: &'_ str) -> PathSplitter<'_> {
         PathSplitter { path, pos: 0 }
     }
 

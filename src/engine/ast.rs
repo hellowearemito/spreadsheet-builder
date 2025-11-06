@@ -40,6 +40,7 @@ pub enum CellType {
     Str,
     Date,
     Image,
+    Bool,
 }
 
 #[derive(Debug)]

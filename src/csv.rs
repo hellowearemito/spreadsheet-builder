@@ -44,6 +44,9 @@ impl CsvWriter {
                 CellType::Image => {
                     // ignore
                 }
+                CellType::Bool => {
+                    self.writer.write_field(cell.value.as_str())?;
+                }
             }
         }
 
