@@ -11,7 +11,7 @@ use pest::Parser;
 #[grammar = "sheet.pest"]
 pub struct SheetParser;
 
-pub fn parse_stream(stream: &str) -> SpreadSheetResult<SyntaxTree> {
+pub fn parse_stream(stream: &'_ str) -> SpreadSheetResult<SyntaxTree<'_>> {
     let pairs = SheetParser::parse(Rule::main, stream).map_err(|e| {
         let pos = e.line_col;
         let msg = format!("Syntax error at {:?}, {:?}", pos, e.variant);
@@ -217,6 +217,9 @@ fn parse_value(pair: Pair<Rule>) -> Value {
         Rule::string => {
             value = Value::String(decode_string(pair.as_str()));
         }
+        Rule::boolean => {
+            value = Value::String(decode_string(pair.as_str()));
+        }
         _ => {}
     }
 
@@ -322,6 +325,7 @@ fn parse_cell(pairs: pest::iterators::Pairs<Rule>) -> Cell {
                     "str" => CellType::Str,
                     "date" => CellType::Date,
                     "img" => CellType::Image,
+                    "bool" => CellType::Bool,
                     _ => CellType::Str,
                 };
             }
@@ -375,7 +379,7 @@ fn parse_cell(pairs: pest::iterators::Pairs<Rule>) -> Cell {
 fn parse_expression(pairs: pest::iterators::Pairs<Rule>) -> Expression {
     for pair in pairs {
         match pair.as_rule() {
-            Rule::number | Rule::string => {
+            Rule::number | Rule::string | Rule::boolean => {
                 let value = parse_value(pair);
                 return Expression::Value(value);
             }
