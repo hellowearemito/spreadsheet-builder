@@ -217,9 +217,6 @@ fn parse_value(pair: Pair<Rule>) -> Value {
         Rule::string => {
             value = Value::String(decode_string(pair.as_str()));
         }
-        Rule::boolean => {
-            value = Value::String(decode_string(pair.as_str()));
-        }
         _ => {}
     }
 
@@ -379,7 +376,7 @@ fn parse_cell(pairs: pest::iterators::Pairs<Rule>) -> Cell {
 fn parse_expression(pairs: pest::iterators::Pairs<Rule>) -> Expression {
     for pair in pairs {
         match pair.as_rule() {
-            Rule::number | Rule::string | Rule::boolean => {
+            Rule::number | Rule::string => {
                 let value = parse_value(pair);
                 return Expression::Value(value);
             }
