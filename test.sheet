@@ -54,6 +54,8 @@ for $val in $arr {
 
 [ str("Wrong date:"), date($bad) ]
 
+[str("true statement:"), if str("true") ? str("was true") : str("was false"), str("false statement:"), if str("false") ? str("was true") : str("was false")]
+
 /* autofit */
 
 /*

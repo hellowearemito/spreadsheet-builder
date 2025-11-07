@@ -142,6 +142,13 @@ impl Expression<'_> {
             _ => 0.0,
         }
     }
+
+    pub fn as_bool(&self) -> bool {
+        match self {
+            Expression::Value(v) => v.as_bool(),
+            _ => false,
+        }
+    }
 }
 
 impl Expr<'_> {
@@ -156,6 +163,13 @@ impl Expr<'_> {
         match self {
             Expr::Primary(v) => v.as_f64(),
             _ => 0.0,
+        }
+    }
+
+    pub fn as_bool(&self) -> bool {
+        match self {
+            Expr::Primary(v) => v.as_bool(),
+            _ => false,
         }
     }
 }

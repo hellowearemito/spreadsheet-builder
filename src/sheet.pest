@@ -67,7 +67,7 @@ rowspec = { "row" ~ "(" ~ number ~ "," ~ width_unit ~ "(" ~ number ~ ")" ~ ")" }
 
 body = _{ (for_loop | anchor | mover | cr | autofit | column | row | rowspec)* }
 
-row = { "[" ~ cell ~ ("," ~ cell)* ~ "]" }
+row = { "[" ~ (cell|if_statement) ~ ("," ~ (cell|if_statement))* ~ "]" }
 
 cell_type = { ("num" | "str" | "date" | "img") }
 
@@ -78,7 +78,12 @@ image_mode = @{ ( "embed" | "insert" ) }
 
 cell = { cell_type ~ "(" ~ expr ~ ("," ~ format_identifier)? ~ ("," ~ image_mode)? ~ colspan? ~ rowspan? ~ ")" }
 
-for_loop = { "for" ~ variable_identifier ~ "in" ~ expression ~ "{" ~ body ~ "}" }  
+for_loop = { "for" ~ variable_identifier ~ "in" ~ expression ~ "{" ~ body ~ "}" }
+
+condition = _{ "?" }
+seperator = _{ ":" }
+
+if_statement = !{ "if" ~ (cell | expression) ~ condition ~ (cell | expression) ~ seperator ~ (cell | expression) }
 
 main = _{
  SOI
