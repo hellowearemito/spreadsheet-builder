@@ -81,9 +81,9 @@ cell = { cell_type ~ "(" ~ expr ~ ("," ~ format_identifier)? ~ ("," ~ image_mode
 for_loop = { "for" ~ variable_identifier ~ "in" ~ expression ~ "{" ~ body ~ "}" }
 
 condition = _{ "?" }
-seperator = _{ ":" }
+separator = _{ ":" }
 
-if_statement = !{ "if" ~ (cell | expression) ~ condition ~ (cell | expression) ~ seperator ~ (cell | expression) }
+if_statement = !{ "if" ~ (cell | expression) ~ condition ~ (cell | expression) ~ separator ~ (cell | expression) }
 
 main = _{
  SOI

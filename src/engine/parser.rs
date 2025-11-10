@@ -430,8 +430,7 @@ fn parse_if_statement(pairs: pest::iterators::Pairs<Rule>) -> Cell {
     let true_statement = parse_cell(data.next().unwrap().into_inner());
     let false_statement = parse_cell(data.next().unwrap().into_inner());
 
-    if condition.value.as_bool()
-    {
+    if condition.value.as_bool() {
         return true_statement;
     } else {
         return false_statement;
