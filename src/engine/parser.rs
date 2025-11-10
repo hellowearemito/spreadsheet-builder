@@ -71,6 +71,10 @@ fn parse_element(pair: Pair<Rule>) -> Option<Element> {
             let for_loop = parse_for_loop(pair.into_inner());
             Some(Element::ForLoop(for_loop))
         }
+        Rule::if_statement => {
+            let if_statement = parse_if_statement(pair.into_inner());
+            Some(Element::IfStatement(if_statement))
+        }
         _ => None,
     }
 }
@@ -100,6 +104,35 @@ fn parse_for_loop(pairs: pest::iterators::Pairs<Rule>) -> ForLoop {
         expression,
         elements,
     }
+}
+
+fn parse_if_statement(pairs: pest::iterators::Pairs<Rule>) -> IfStatement {
+    let mut pairs = pairs.clone();
+
+    let expression = parse_expression(pairs.next().unwrap().into_inner());
+
+    let mut true_elements = Vec::new();
+    let mut false_elements = Vec::new();
+
+    let mut is_true = true;
+
+    for pair in pairs {
+        if pair.as_rule() == Rule::if_seperator {
+            is_true = false;
+        }
+
+        if is_true {
+            if let Some(element) = parse_element(pair) {
+                true_elements.push(element);
+            }
+        } else {
+            if let Some(element) = parse_element(pair) {
+                false_elements.push(element);
+            }
+        }
+    };
+
+    IfStatement { expression, true_elements, false_elements }
 }
 
 fn parse_format(pairs: pest::iterators::Pairs<Rule>) -> Format {
@@ -416,23 +449,6 @@ fn parse_row(pairs: pest::iterators::Pairs<Rule>) -> Row {
             let cell = parse_cell(pair.into_inner());
             cells.push(cell);
         }
-        else if pair.as_rule() == Rule::if_statement {
-            let cell = parse_if_statement(pair.into_inner());
-            cells.push(cell);
-        }
     }
     Row { cells }
-}
-
-fn parse_if_statement(pairs: pest::iterators::Pairs<Rule>) -> Cell {
-    let mut data = pairs.clone();
-    let condition = parse_cell(data.next().unwrap().into_inner());
-    let true_statement = parse_cell(data.next().unwrap().into_inner());
-    let false_statement = parse_cell(data.next().unwrap().into_inner());
-
-    if condition.value.as_bool() {
-        return true_statement;
-    } else {
-        return false_statement;
-    }
 }

@@ -67,6 +67,7 @@ pub enum Element<'a> {
     Row(Row<'a>),
     Mover(Move<'a>),
     ForLoop(ForLoop<'a>),
+    IfStatement(IfStatement<'a>),
     Cr(Cr),
     Autofit(Autofit),
     Column(Column<'a>),
@@ -111,6 +112,13 @@ pub struct ForLoop<'a> {
     pub variable: &'a str,
     pub expression: Expression<'a>,
     pub elements: Vec<Element<'a>>,
+}
+
+#[derive(Debug)]
+pub struct IfStatement<'a> {
+    pub expression: Expression<'a>,
+    pub true_elements: Vec<Element<'a>>,
+    pub false_elements: Vec<Element<'a>>,
 }
 
 #[derive(Debug)]

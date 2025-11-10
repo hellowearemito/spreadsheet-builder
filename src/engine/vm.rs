@@ -1,5 +1,5 @@
 use crate::engine::ast::{
-    Cell, Element, Expr, Expression, ForLoop, Format, Modifier, Operator, Row,
+    Cell, Element, Expr, Expression, ForLoop, Format, IfStatement, Modifier, Operator, Row
 };
 use crate::engine::diag::SpreadSheetError;
 use crate::engine::scope::{Scopes, Value};
@@ -39,6 +39,9 @@ impl VM {
                 Element::ForLoop(for_loop) => {
                     self.for_loop(for_loop, processor)?;
                 }
+                Element::IfStatement(if_statement) => {
+                    self.if_statement(if_statement, processor)?;
+                }
                 _ => {
                     processor.process(item)?;
                 }
@@ -61,6 +64,25 @@ impl VM {
                 self.run(&for_loop.elements, processor)?;
                 self.scopes.exit();
             }
+        }
+        Ok(())
+    }
+
+    pub fn if_statement<'a>(
+        &mut self,
+        if_statement: &'a IfStatement<'a>,
+        processor: &mut impl SheetProcessor,
+    ) -> Result<(), SpreadSheetError> {
+        let value = self.resolve_expression(&if_statement.expression)?;
+
+        if value.as_bool() {
+            self.scopes.enter();
+            self.run(&if_statement.true_elements, processor)?;
+            self.scopes.exit();
+        } else {
+            self.scopes.enter();
+            self.run(&if_statement.false_elements, processor)?;
+            self.scopes.exit();
         }
         Ok(())
     }
