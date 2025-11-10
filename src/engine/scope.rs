@@ -39,6 +39,16 @@ impl Value {
         }
     }
 
+    pub fn as_bool(&self) -> bool {
+        match self {
+            Value::Boolean(b) => *b,
+            Value::Integer(i) => if *i == 0 { false } else { true }
+            Value::Float(f) => if *f == 0.0 { false } else { true }
+            Value::String(s) => if s.to_lowercase() == "true" { true } else { false }
+            _ => false,
+        }
+    }
+
     pub fn resolve(&self, path: &mut PathSplitter) -> Option<&Value> {
         if let Some(name) = path.next() {
             match self {

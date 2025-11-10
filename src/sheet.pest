@@ -65,7 +65,7 @@ width_unit = @{ ( "chars" | "pixels" ) }
 column = { "col" ~ "(" ~ number ~ "," ~ number ~ "," ~ width_unit ~ "(" ~ number ~ ")" ~ ")" }
 rowspec = { "row" ~ "(" ~ number ~ "," ~ width_unit ~ "(" ~ number ~ ")" ~ ")" }
 
-body = _{ (for_loop | anchor | mover | cr | autofit | column | row | rowspec)* }
+body = _{ (for_loop | anchor | mover | cr | autofit | column | row | rowspec | if_statement)* }
 
 row = { "[" ~ cell ~ ("," ~ cell)* ~ "]" }
 
@@ -78,7 +78,11 @@ image_mode = @{ ( "embed" | "insert" ) }
 
 cell = { cell_type ~ "(" ~ expr ~ ("," ~ format_identifier)? ~ ("," ~ image_mode)? ~ colspan? ~ rowspan? ~ ")" }
 
-for_loop = { "for" ~ variable_identifier ~ "in" ~ expression ~ "{" ~ body ~ "}" }  
+for_loop = { "for" ~ variable_identifier ~ "in" ~ expression ~ "{" ~ body ~ "}" }
+
+if_seperator = { "else" }
+
+if_statement = { "if" ~ expression ~ "{" ~ body ~ "}" ~ if_seperator ~ "{" ~ body ~ "}" }
 
 main = _{
  SOI

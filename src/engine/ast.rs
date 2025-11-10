@@ -67,6 +67,7 @@ pub enum Element<'a> {
     Row(Row<'a>),
     Mover(Move<'a>),
     ForLoop(ForLoop<'a>),
+    IfStatement(IfStatement<'a>),
     Cr(Cr),
     Autofit(Autofit),
     Column(Column<'a>),
@@ -114,6 +115,13 @@ pub struct ForLoop<'a> {
 }
 
 #[derive(Debug)]
+pub struct IfStatement<'a> {
+    pub expression: Expression<'a>,
+    pub true_elements: Vec<Element<'a>>,
+    pub false_elements: Vec<Element<'a>>,
+}
+
+#[derive(Debug)]
 pub struct Column<'a> {
     pub start: u16,
     pub end: u16,
@@ -142,6 +150,13 @@ impl Expression<'_> {
             _ => 0.0,
         }
     }
+
+    pub fn as_bool(&self) -> bool {
+        match self {
+            Expression::Value(v) => v.as_bool(),
+            _ => false,
+        }
+    }
 }
 
 impl Expr<'_> {
@@ -156,6 +171,13 @@ impl Expr<'_> {
         match self {
             Expr::Primary(v) => v.as_f64(),
             _ => 0.0,
+        }
+    }
+
+    pub fn as_bool(&self) -> bool {
+        match self {
+            Expr::Primary(v) => v.as_bool(),
+            _ => false,
         }
     }
 }

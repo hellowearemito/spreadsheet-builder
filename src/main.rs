@@ -33,6 +33,14 @@ fn main() {
                 "bad",
                 spreadsheet_builder::engine::scope::Value::String(String::from("sdfsd")),
             );
+            vm.scopes.top.define(
+                "mytrueboolean",
+                spreadsheet_builder::engine::scope::Value::Boolean(true),
+            );
+            vm.scopes.top.define(
+                "myfalseboolean",
+                spreadsheet_builder::engine::scope::Value::Boolean(false),
+            );
             let mut writer = spreadsheet_builder::xlsx::XlsxWriter::default();
             let res = vm.run(&tree.elements, &mut writer);
             match res {

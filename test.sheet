@@ -54,6 +54,19 @@ for $val in $arr {
 
 [ str("Wrong date:"), date($bad) ]
 
+if  $mytrueboolean {
+  [ str("this is"), str("a true block") ]
+} 
+else {
+  [ str("this is"), str("a false block") ]
+}
+
+if  $myfalseboolean {
+  [ str("this is"), str("a true block") ]
+} 
+else {
+  [ str("this is"), str("a false block") ]
+}
 /* autofit */
 
 /*
