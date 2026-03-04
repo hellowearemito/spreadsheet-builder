@@ -54,18 +54,201 @@ for $val in $arr {
 
 [ str("Wrong date:"), date($bad) ]
 
-if  $mytrueboolean {
-  [ str("this is"), str("a true block") ]
-} 
-else {
-  [ str("this is"), str("a false block") ]
+/* === BOOLEAN CONDITIONS === */
+if $mytrueboolean {
+  [ str("bool: $mytrueboolean => TRUE pass") ]
+} else {
+  [ str("bool: $mytrueboolean => FALSE fail") ]
 }
 
-if  $myfalseboolean {
-  [ str("this is"), str("a true block") ]
-} 
-else {
-  [ str("this is"), str("a false block") ]
+if $myfalseboolean {
+  [ str("bool: $myfalseboolean => TRUE fail") ]
+} else {
+  [ str("bool: $myfalseboolean => FALSE pass") ]
+}
+
+/* === STRING as_bool === */
+if $truestring {
+  [ str("string as_bool: 'true' => TRUE pass") ]
+} else {
+  [ str("string as_bool: 'true' => FALSE fail") ]
+}
+
+if $falsestring {
+  [ str("string as_bool: 'false' => TRUE fail") ]
+} else {
+  [ str("string as_bool: 'false' => FALSE pass") ]
+}
+
+if $emptystring {
+  [ str("string as_bool: '' => TRUE fail") ]
+} else {
+  [ str("string as_bool: '' => FALSE pass") ]
+}
+
+/* === INTEGER EQUALITY === */
+if $myinteger == 3 {
+  [ str("int ==: $myinteger == 3 => TRUE pass") ]
+} else {
+  [ str("int ==: $myinteger == 3 => FALSE fail") ]
+}
+
+if $myinteger == 5 {
+  [ str("int ==: $myinteger == 5 => TRUE fail") ]
+} else {
+  [ str("int ==: $myinteger == 5 => FALSE pass") ]
+}
+
+if $myinteger != 5 {
+  [ str("int !=: $myinteger != 5 => TRUE pass") ]
+} else {
+  [ str("int !=: $myinteger != 5 => FALSE fail") ]
+}
+
+if $myinteger != 3 {
+  [ str("int !=: $myinteger != 3 => TRUE fail") ]
+} else {
+  [ str("int !=: $myinteger != 3 => FALSE pass") ]
+}
+
+/* === INTEGER COMPARISON === */
+if $myinteger > 2 {
+  [ str("int >: $myinteger > 2 => TRUE pass") ]
+} else {
+  [ str("int >: $myinteger > 2 => FALSE fail") ]
+}
+
+if $myinteger > 5 {
+  [ str("int >: $myinteger > 5 => TRUE fail") ]
+} else {
+  [ str("int >: $myinteger > 5 => FALSE pass") ]
+}
+
+if $myinteger < 5 {
+  [ str("int <: $myinteger < 5 => TRUE pass") ]
+} else {
+  [ str("int <: $myinteger < 5 => FALSE fail") ]
+}
+
+if $myinteger < 2 {
+  [ str("int <: $myinteger < 2 => TRUE fail") ]
+} else {
+  [ str("int <: $myinteger < 2 => FALSE pass") ]
+}
+
+if $myinteger >= 3 {
+  [ str("int >=: $myinteger >= 3 => TRUE pass") ]
+} else {
+  [ str("int >=: $myinteger >= 3 => FALSE fail") ]
+}
+
+if $myinteger >= 5 {
+  [ str("int >=: $myinteger >= 5 => TRUE fail") ]
+} else {
+  [ str("int >=: $myinteger >= 5 => FALSE pass") ]
+}
+
+if $myinteger <= 3 {
+  [ str("int <=: $myinteger <= 3 => TRUE pass") ]
+} else {
+  [ str("int <=: $myinteger <= 3 => FALSE fail") ]
+}
+
+if $myinteger <= 2 {
+  [ str("int <=: $myinteger <= 2 => TRUE fail") ]
+} else {
+  [ str("int <=: $myinteger <= 2 => FALSE pass") ]
+}
+
+/* === ZERO AND NEGATIVE === */
+if $zero == 0 {
+  [ str("int ==: $zero == 0 => TRUE pass") ]
+} else {
+  [ str("int ==: $zero == 0 => FALSE fail") ]
+}
+
+if $negative < 0 {
+  [ str("int <: $negative < 0 => TRUE pass") ]
+} else {
+  [ str("int <: $negative < 0 => FALSE fail") ]
+}
+
+if $negative > 0 {
+  [ str("int >: $negative > 0 => TRUE fail") ]
+} else {
+  [ str("int >: $negative > 0 => FALSE pass") ]
+}
+
+/* === FLOAT COMPARISON === */
+if $largefloat > 9.0 {
+  [ str("float >: $largefloat > 9.0 => TRUE pass") ]
+} else {
+  [ str("float >: $largefloat > 9.0 => FALSE fail") ]
+}
+
+if $smallfloat < 1.0 {
+  [ str("float <: $smallfloat < 1.0 => TRUE pass") ]
+} else {
+  [ str("float <: $smallfloat < 1.0 => FALSE fail") ]
+}
+
+if $largefloat == 9.99 {
+  [ str("float ==: $largefloat == 9.99 => TRUE pass") ]
+} else {
+  [ str("float ==: $largefloat == 9.99 => FALSE fail") ]
+}
+
+/* === STRING COMPARISON === */
+if $mystring == "hello" {
+  [ str("str ==: $mystring == 'hello' => TRUE pass") ]
+} else {
+  [ str("str ==: $mystring == 'hello' => FALSE fail") ]
+}
+
+if $mystring == "world" {
+  [ str("str ==: $mystring == 'world' => TRUE fail") ]
+} else {
+  [ str("str ==: $mystring == 'world' => FALSE pass") ]
+}
+
+if $mystring != "world" {
+  [ str("str !=: $mystring != 'world' => TRUE pass") ]
+} else {
+  [ str("str !=: $mystring != 'world' => FALSE fail") ]
+}
+
+if $mystring < "zoo" {
+  [ str("str <: $mystring < 'zoo' => TRUE pass") ]
+} else {
+  [ str("str <: $mystring < 'zoo' => FALSE fail") ]
+}
+
+if $mystring > "apple" {
+  [ str("str >: $mystring > 'apple' => TRUE pass") ]
+} else {
+  [ str("str >: $mystring > 'apple' => FALSE fail") ]
+}
+
+/* === VARIABLE vs VARIABLE === */
+if $myinteger == $myinteger {
+  [ str("var==var: $myinteger == $myinteger => TRUE pass") ]
+} else {
+  [ str("var==var: $myinteger == $myinteger => FALSE fail") ]
+}
+
+if $myinteger >= $zero {
+  [ str("var>=var: $myinteger >= $zero => TRUE pass") ]
+} else {
+  [ str("var>=var: $myinteger >= $zero => FALSE fail") ]
+}
+
+/* === NO ELSE (optional else) === */
+if $mytrueboolean {
+  [ str("no else: $mytrueboolean => only true branch rendered pass") ]
+}
+
+if $myfalseboolean {
+  [ str("no else: $myfalseboolean => this should NOT appear fail") ]
 }
 /* autofit */
 
