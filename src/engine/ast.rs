@@ -115,8 +115,24 @@ pub struct ForLoop<'a> {
 }
 
 #[derive(Debug)]
+pub enum CompareOp {
+    Eq,
+    Neq,
+    Lt,
+    Gt,
+    Lte,
+    Gte,
+}
+
+#[derive(Debug)]
+pub struct Condition<'a> {
+    pub lhs: Expr<'a>,
+    pub op: Option<(CompareOp, Expr<'a>)>,
+}
+
+#[derive(Debug)]
 pub struct IfStatement<'a> {
-    pub expression: Expression<'a>,
+    pub condition: Condition<'a>,
     pub true_elements: Vec<Element<'a>>,
     pub false_elements: Vec<Element<'a>>,
 }

@@ -1,5 +1,5 @@
 use crate::engine::ast::{
-    Cell, Element, Expr, Expression, ForLoop, Format, IfStatement, Modifier, Operator, Row
+    Cell, CompareOp, Condition, Element, Expr, Expression, ForLoop, Format, IfStatement, Modifier, Operator, Row
 };
 use crate::engine::diag::SpreadSheetError;
 use crate::engine::scope::{Scopes, Value};
@@ -73,9 +73,9 @@ impl VM {
         if_statement: &'a IfStatement<'a>,
         processor: &mut impl SheetProcessor,
     ) -> Result<(), SpreadSheetError> {
-        let value = self.resolve_expression(&if_statement.expression)?;
+        let result = self.eval_condition(&if_statement.condition)?;
 
-        if value.as_bool() {
+        if result {
             self.scopes.enter();
             self.run(&if_statement.true_elements, processor)?;
             self.scopes.exit();
@@ -85,6 +85,26 @@ impl VM {
             self.scopes.exit();
         }
         Ok(())
+    }
+
+    pub fn eval_condition(&self, condition: &Condition) -> Result<bool, SpreadSheetError> {
+        let lhs = self.resolve_expr(&condition.lhs)?;
+
+        match &condition.op {
+            None => Ok(lhs.as_bool()),
+            Some((op, rhs_expr)) => {
+                let rhs = self.resolve_expr(rhs_expr)?;
+                let result = match op {
+                    CompareOp::Eq  => lhs.eq(&rhs),
+                    CompareOp::Neq => !lhs.eq(&rhs),
+                    CompareOp::Lt  => lhs.lt(&rhs),
+                    CompareOp::Gt  => lhs.gt(&rhs),
+                    CompareOp::Lte => lhs.lt(&rhs) || lhs.eq(&rhs),
+                    CompareOp::Gte => lhs.gt(&rhs) || lhs.eq(&rhs),
+                };
+                Ok(result)
+            }
+        }
     }
 
     pub fn resolve_expression(&self, expression: &Expression) -> Result<Value, SpreadSheetError> {

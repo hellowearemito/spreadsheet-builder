@@ -49,6 +49,34 @@ impl Value {
         }
     }
 
+    pub fn eq(&self, rhs: &Value) -> bool {
+        match (self, rhs) {
+            (Value::Integer(l), Value::Integer(r)) => l == r,
+            (Value::Float(l), Value::Float(r)) => l == r,
+            (Value::String(l), Value::String(r)) => l == r,
+            (Value::Boolean(l), Value::Boolean(r)) => l == r,
+            _ => false,
+        }
+    }
+
+    pub fn lt(&self, rhs: &Value) -> bool {
+        match (self, rhs) {
+            (Value::Integer(l), Value::Integer(r)) => l < r,
+            (Value::Float(l), Value::Float(r)) => l < r,
+            (Value::String(l), Value::String(r)) => l < r,
+            _ => false,
+        }
+    }
+
+    pub fn gt(&self, rhs: &Value) -> bool {
+        match (self, rhs) {
+            (Value::Integer(l), Value::Integer(r)) => l > r,
+            (Value::Float(l), Value::Float(r)) => l > r,
+            (Value::String(l), Value::String(r)) => l > r,
+            _ => false,
+        }
+    }
+
     pub fn resolve(&self, path: &mut PathSplitter) -> Option<&Value> {
         if let Some(name) = path.next() {
             match self {

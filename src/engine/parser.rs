@@ -107,9 +107,9 @@ fn parse_for_loop(pairs: pest::iterators::Pairs<Rule>) -> ForLoop {
 }
 
 fn parse_if_statement(pairs: pest::iterators::Pairs<Rule>) -> IfStatement {
-    let mut pairs = pairs.clone();
+    let mut pairs = pairs;
 
-    let expression = parse_expression(pairs.next().unwrap().into_inner());
+    let condition = parse_condition(pairs.next().expect("grammar should guarantee pair").into_inner());
 
     let mut true_elements = Vec::new();
     let mut false_elements = Vec::new();
@@ -130,9 +130,47 @@ fn parse_if_statement(pairs: pest::iterators::Pairs<Rule>) -> IfStatement {
                 false_elements.push(element);
             }
         }
+    }
+
+    IfStatement { condition, true_elements, false_elements }
+}
+
+fn parse_condition(pairs: pest::iterators::Pairs<Rule>) -> Condition {
+    let pratt = make_pratt();
+    let mut pairs = pairs;
+
+    let lhs_pair = pairs.next().expect("grammar should guarantee at least one pair");
+    let lhs = parse_expr(lhs_pair.into_inner(), &pratt);
+
+    let op = if let Some(op_pair) = pairs.next() {
+        if op_pair.as_rule() == Rule::compare_op {
+            let cmp = match op_pair.as_str() {
+                "==" => CompareOp::Eq,
+                "!=" => CompareOp::Neq,
+                "<=" => CompareOp::Lte,
+                ">=" => CompareOp::Gte,
+                "<"  => CompareOp::Lt,
+                ">"  => CompareOp::Gt,
+                _    => unreachable!(),
+            };
+            let rhs_pair = pairs.next().expect("grammar should guarantee pair after op");
+            let rhs = parse_expr(rhs_pair.into_inner(), &pratt);
+            Some((cmp, rhs))
+        } else {
+            None
+        }
+    } else {
+        None
     };
 
-    IfStatement { expression, true_elements, false_elements }
+    Condition { lhs, op }
+}
+
+fn make_pratt() -> PrattParser<Rule> {
+    PrattParser::new()
+        .op(Op::infix(Rule::add, Assoc::Left) | Op::infix(Rule::sub, Assoc::Left))
+        .op(Op::infix(Rule::mul, Assoc::Left) | Op::infix(Rule::div, Assoc::Left))
+        .op(Op::prefix(Rule::neg))
 }
 
 fn parse_format(pairs: pest::iterators::Pairs<Rule>) -> Format {
@@ -152,13 +190,7 @@ fn parse_format(pairs: pest::iterators::Pairs<Rule>) -> Format {
                             statement = modifier_pair.as_str();
                         }
                         Rule::expr => {
-                            let pratt = PrattParser::new()
-                                .op(Op::infix(Rule::add, Assoc::Left)
-                                    | Op::infix(Rule::sub, Assoc::Left))
-                                .op(Op::infix(Rule::mul, Assoc::Left)
-                                    | Op::infix(Rule::div, Assoc::Left))
-                                .op(Op::prefix(Rule::neg));
-                            expression = parse_expr(modifier_pair.into_inner(), &pratt);
+                            expression = parse_expr(modifier_pair.into_inner(), &make_pratt());
                         }
                         _ => {}
                     }
@@ -366,11 +398,7 @@ fn parse_cell(pairs: pest::iterators::Pairs<Rule>) -> Cell {
                 value = Expr::Primary(parse_expression(pair.into_inner()));
             }
             Rule::expr => {
-                let pratt = PrattParser::new()
-                    .op(Op::infix(Rule::add, Assoc::Left) | Op::infix(Rule::sub, Assoc::Left))
-                    .op(Op::infix(Rule::mul, Assoc::Left) | Op::infix(Rule::div, Assoc::Left))
-                    .op(Op::prefix(Rule::neg));
-                value = parse_expr(pair.into_inner(), &pratt);
+                value = parse_expr(pair.into_inner(), &make_pratt());
                 // println!("{:?}", value);
             }
             Rule::image_mode => {
