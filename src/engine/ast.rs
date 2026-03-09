@@ -44,7 +44,7 @@ pub enum RowItem<'a> {
 
 #[derive(Debug)]
 pub struct Row<'a> {
-    pub cells: Vec<RowItem<'a>>, // changed from Vec<Cell>
+    pub cells: Vec<RowItem<'a>>,
 }
 
 #[derive(Debug, Copy, Clone)]
