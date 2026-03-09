@@ -1,4 +1,4 @@
-use crate::engine::ast::{CellType, Element, Row};
+use crate::engine::ast::{CellType, Element, Row, RowItem};
 use crate::engine::diag::SpreadSheetError;
 use crate::engine::vm::SheetProcessor;
 use csv::{Writer, WriterBuilder};
@@ -30,7 +30,11 @@ impl CsvWriter {
     }
 
     pub fn process_row(&mut self, row: &Row) -> Result<(), csv::Error> {
-        for cell in &row.cells {
+        for item in &row.cells {
+            let cell = match item {
+                RowItem::Cell(cell) => cell,
+                RowItem::ForEachCell(_) => continue,
+            };
             match cell.cell_type {
                 CellType::Num => {
                     self.writer.write_field(cell.value.as_f64().to_string())?;

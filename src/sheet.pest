@@ -67,7 +67,11 @@ rowspec = { "row" ~ "(" ~ number ~ "," ~ width_unit ~ "(" ~ number ~ ")" ~ ")" }
 
 body = _{ (for_loop | anchor | mover | cr | autofit | column | row | rowspec | if_statement)* }
 
-row = { "[" ~ cell ~ ("," ~ cell)* ~ "]" }
+for_each_cell = { "for" ~ variable_identifier ~ "in" ~ expression ~ "{" ~ cell ~ "}" }
+
+row = { "[" ~ row_item ~ ("," ~ row_item)* ~ "]" }
+
+row_item = _{ for_each_cell | cell }
 
 cell_type = { ("num" | "str" | "date" | "img") }
 

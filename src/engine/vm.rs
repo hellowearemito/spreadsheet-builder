@@ -1,5 +1,5 @@
 use crate::engine::ast::{
-    Cell, CompareOp, Condition, Element, Expr, Expression, ForLoop, Format, IfStatement, Modifier, Operator, Row
+    Cell, CompareOp, Condition, Element, Expr, Expression, ForLoop, Format, IfStatement, Modifier, Operator, Row, RowItem
 };
 use crate::engine::diag::SpreadSheetError;
 use crate::engine::scope::{Scopes, Value};
@@ -171,18 +171,42 @@ impl VM {
         }
     }
 
-    pub fn resolve<'b>(&self, row: &'b Row) -> Result<Row<'b>, SpreadSheetError> {
+    pub fn resolve<'b>(&mut self, row: &'b Row) -> Result<Row<'b>, SpreadSheetError> {
         let mut cells = Vec::new();
-        for cell in &row.cells {
-            let v = self.resolve_expr(&cell.value)?;
-            cells.push(Cell {
-                cell_type: cell.cell_type,
-                value: Expr::Primary(Expression::Value(v)),
-                format: cell.format,
-                colspan: cell.colspan,
-                rowspan: cell.rowspan,
-                image_mode: cell.image_mode,
-            });
+        for item in &row.cells {
+            match item {
+                RowItem::Cell(cell) => {
+                    let v = self.resolve_expr(&cell.value)?;
+                    cells.push(RowItem::Cell(Cell {
+                        cell_type: cell.cell_type,
+                        value: Expr::Primary(Expression::Value(v)),
+                        format: cell.format,
+                        colspan: cell.colspan,
+                        rowspan: cell.rowspan,
+                        image_mode: cell.image_mode,
+                    }));
+                }
+                RowItem::ForEachCell(for_each) => {
+                    let value = self.resolve_expression(&for_each.expression)?;
+                    if let Value::Array(arr) = value {
+                        for (i, v) in arr.iter().enumerate() {
+                            self.scopes.enter();
+                            self.scopes.top.define("index", Value::Integer(i as i64));
+                            self.scopes.top.define(&for_each.variable[1..], v.clone());
+                            let resolved_val = self.resolve_expr(&for_each.cell.value)?;
+                            cells.push(RowItem::Cell(Cell {
+                                cell_type: for_each.cell.cell_type,
+                                value: Expr::Primary(Expression::Value(resolved_val)),
+                                format: for_each.cell.format,
+                                colspan: for_each.cell.colspan,
+                                rowspan: for_each.cell.rowspan,
+                                image_mode: for_each.cell.image_mode,
+                            }));
+                            self.scopes.exit();
+                        }
+                    }
+                }
+            }
         }
         Ok(Row { cells })
     }

@@ -473,10 +473,49 @@ fn parse_expr<'a>(pairs: pest::iterators::Pairs<'a, Rule>, pratt: &PrattParser<R
 fn parse_row(pairs: pest::iterators::Pairs<Rule>) -> Row {
     let mut cells = Vec::new();
     for pair in pairs {
-        if pair.as_rule() == Rule::cell {
-            let cell = parse_cell(pair.into_inner());
-            cells.push(cell);
+        match pair.as_rule() {
+            Rule::cell => {
+                cells.push(RowItem::Cell(parse_cell(pair.into_inner())));
+            }
+            Rule::for_each_cell => {
+                cells.push(RowItem::ForEachCell(parse_for_each_cell(pair.into_inner())));
+            }
+            _ => {}
         }
     }
     Row { cells }
+}
+
+fn parse_for_each_cell(pairs: pest::iterators::Pairs<Rule>) -> ForEachCell {
+    let mut variable = "";
+    let mut expression = Expression::Value(Value::Integer(0));
+    let mut cell = Cell {
+        cell_type: CellType::Str,
+        value: Expr::Primary(Expression::Value(Value::Integer(0))),
+        format: None,
+        colspan: 1,
+        rowspan: 1,
+        image_mode: None,
+    };
+
+    for pair in pairs {
+        match pair.as_rule() {
+            Rule::variable_identifier => {
+                variable = pair.as_str();
+            }
+            Rule::expression => {
+                expression = parse_expression(pair.into_inner());
+            }
+            Rule::cell => {
+                cell = parse_cell(pair.into_inner());
+            }
+            _ => {}
+        }
+    }
+
+    ForEachCell {
+        variable,
+        expression,
+        cell,
+    }
 }
