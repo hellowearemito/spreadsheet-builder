@@ -30,8 +30,21 @@ pub struct Move<'a> {
 }
 
 #[derive(Debug)]
+pub struct ForEachCell<'a> {
+    pub variable: &'a str,
+    pub expression: Expression<'a>,
+    pub cell: Cell<'a>,
+}
+
+#[derive(Debug)]
+pub enum RowItem<'a> {
+    Cell(Cell<'a>),
+    ForEachCell(ForEachCell<'a>),
+}
+
+#[derive(Debug)]
 pub struct Row<'a> {
-    pub cells: Vec<Cell<'a>>,
+    pub cells: Vec<RowItem<'a>>, // changed from Vec<Cell>
 }
 
 #[derive(Debug, Copy, Clone)]

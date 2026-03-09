@@ -1,4 +1,4 @@
-use crate::engine::ast::{CellType, Element, Row};
+use crate::engine::ast::{CellType, Element, Row, RowItem};
 use crate::engine::diag::SpreadSheetError;
 use crate::engine::vm::SheetProcessor;
 use ecow::EcoString;
@@ -122,7 +122,12 @@ impl XlsxWriter {
         if self.worksheet.is_some() {
             let sheet = self.worksheet.as_mut().unwrap();
             let save_col = self.col;
-            for cell in &row.cells {
+            for item in &row.cells {
+                let cell = match item {
+                    RowItem::Cell(cell) => cell,
+                    RowItem::ForEachCell(_) => continue,
+                };
+
                 let format = if let Some(f) = cell.format {
                     if let Some(f) = self.formats.get(f) {
                         f
