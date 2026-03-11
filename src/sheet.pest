@@ -71,7 +71,7 @@ for_each_cell = { "for" ~ variable_identifier ~ "in" ~ expression ~ "{" ~ cell ~
 
 row = { "[" ~ row_item ~ ("," ~ row_item)* ~ "]" }
 
-row_item = _{ for_each_cell | cell }
+row_item = _{ for_each_cell | for_each_header | cell }
 
 cell_type = { ("num" | "str" | "date" | "img") }
 

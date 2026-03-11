@@ -34,6 +34,7 @@ impl CsvWriter {
             let cell = match item {
                 RowItem::Cell(cell) => cell,
                 RowItem::ForEachCell(_) => continue,
+                RowItem::ForEachHeader(_) => continue,
             };
             match cell.cell_type {
                 CellType::Num => {

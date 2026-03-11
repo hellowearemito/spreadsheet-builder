@@ -40,6 +40,7 @@ pub struct ForEachCell<'a> {
 pub enum RowItem<'a> {
     Cell(Cell<'a>),
     ForEachCell(ForEachCell<'a>),
+    ForEachHeader(ForEachHeader<'a>),
 }
 
 #[derive(Debug)]

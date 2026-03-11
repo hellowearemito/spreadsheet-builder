@@ -266,5 +266,5 @@ sheet("third")
 
 [ str("Start"), for $val in $arr { str($val) }, str("End") ]
 
-header($headers, :gray)
-[ str("Alice"), str("Smith"), num(95), num(87), num(91), str("Good") ]
+[ str("headers"), header($headers, :gray)]
+[ str(""), str("Alice"), str("Smith"), num(95), num(87), num(91), str("Good") ]
