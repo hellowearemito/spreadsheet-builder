@@ -273,8 +273,7 @@ impl VM {
                     "header() array items must be tuples of [text, span]".to_string(),
                 ));
             };
-            let text = tuple
-                .get(0)
+            let text = tuple.first()
                 .ok_or_else(|| {
                     SpreadSheetError::new("header tuple missing text field".to_string())
                 })?
