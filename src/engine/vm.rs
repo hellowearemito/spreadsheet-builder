@@ -127,10 +127,19 @@ impl VM {
                 .ok_or_else(|| SpreadSheetError::new("header tuple missing text field".to_string()))?
                 .as_str();
 
-            let span = tuple
+            let span_value = tuple
                 .get(1)
-                .ok_or_else(|| SpreadSheetError::new("header tuple missing span field".to_string()))?
-                .as_f64() as u16;
+                .ok_or_else(|| SpreadSheetError::new("header tuple missing span field".to_string()))?;
+
+            let span: u16 = match span_value {
+                Value::Integer(n) => *n as u16,
+                other => {
+                    return Err(SpreadSheetError::new(format!(
+                        "header tuple span must be an integer, got: {:?}",
+                        other
+                    )));
+                }
+            };
 
             let span = span.max(1);
 
