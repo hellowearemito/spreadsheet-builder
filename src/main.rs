@@ -77,6 +77,23 @@ fn main() {
                 "falsestring",
                 spreadsheet_builder::engine::scope::Value::String(String::from("false")),
             );
+
+            let headers = spreadsheet_builder::engine::scope::Value::Array(Arc::new(vec![
+            spreadsheet_builder::engine::scope::Value::Array(Arc::new(vec![
+                spreadsheet_builder::engine::scope::Value::String(String::from("Name")),
+                spreadsheet_builder::engine::scope::Value::Integer(2),
+            ])),
+            spreadsheet_builder::engine::scope::Value::Array(Arc::new(vec![
+                spreadsheet_builder::engine::scope::Value::String(String::from("Score")),
+                spreadsheet_builder::engine::scope::Value::Integer(3),
+            ])),
+            spreadsheet_builder::engine::scope::Value::Array(Arc::new(vec![
+                spreadsheet_builder::engine::scope::Value::String(String::from("Notes")),
+                spreadsheet_builder::engine::scope::Value::Integer(1),
+            ])),
+        ]));
+
+        vm.scopes.top.define("headers", headers);
             let mut writer = spreadsheet_builder::xlsx::XlsxWriter::default();
             let res = vm.run(&tree.elements, &mut writer);
             match res {

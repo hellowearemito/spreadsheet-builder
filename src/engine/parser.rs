@@ -75,6 +75,10 @@ fn parse_element(pair: Pair<Rule>) -> Option<Element> {
             let if_statement = parse_if_statement(pair.into_inner());
             Some(Element::IfStatement(if_statement))
         }
+        Rule::for_each_header => {
+            let header = parse_for_each_header(pair.into_inner());
+            Some(Element::ForEachHeader(header))
+        }
         _ => None,
     }
 }
@@ -518,4 +522,17 @@ fn parse_for_each_cell(pairs: pest::iterators::Pairs<Rule>) -> ForEachCell {
         expression,
         cell,
     }
+}
+
+fn parse_for_each_header(pairs: pest::iterators::Pairs<Rule>) -> ForEachHeader {
+    let mut variable = "";
+    let mut format = None;
+    for pair in pairs {
+        match pair.as_rule() {
+            Rule::variable_identifier => variable = pair.as_str(),
+            Rule::format_identifier => format = Some(pair.as_str()),
+            _ => {}
+        }
+    }
+    ForEachHeader { variable, format }
 }

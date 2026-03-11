@@ -1,5 +1,5 @@
 use crate::engine::ast::{
-    Cell, CompareOp, Condition, Element, Expr, Expression, ForLoop, Format, IfStatement, Modifier, Operator, Row, RowItem
+    Cell, CompareOp, Condition, Element, Expr, Expression, ForEachHeader, ForLoop, Format, IfStatement, Modifier, Operator, Row, RowItem
 };
 use crate::engine::diag::SpreadSheetError;
 use crate::engine::scope::{Scopes, Value};
@@ -41,6 +41,9 @@ impl VM {
                 }
                 Element::IfStatement(if_statement) => {
                     self.if_statement(if_statement, processor)?;
+                }
+                Element::ForEachHeader(for_each_header) => {
+                    self.for_each_header(for_each_header, processor)?;
                 }
                 _ => {
                     processor.process(item)?;
@@ -84,6 +87,66 @@ impl VM {
             self.run(&if_statement.false_elements, processor)?;
             self.scopes.exit();
         }
+        Ok(())
+    }
+
+        pub fn for_each_header(
+        &mut self,
+        for_each_header: &ForEachHeader,
+        processor: &mut impl SheetProcessor,
+    ) -> Result<(), SpreadSheetError> {
+        let value = self
+            .scopes
+            .resolve_identifier(for_each_header.variable)
+            .cloned()
+            .ok_or_else(|| {
+                SpreadSheetError::new(format!(
+                    "Unresolved identifier: {}",
+                    for_each_header.variable
+                ))
+            })?;
+
+        let Value::Array(arr) = value else {
+            return Err(SpreadSheetError::new(format!(
+                "header() variable must be an array, got: {}",
+                for_each_header.variable
+            )));
+        };
+
+        let mut cells = Vec::new();
+
+        for item in arr.iter() {
+            let Value::Array(tuple) = item else {
+                return Err(SpreadSheetError::new(
+                    "header() array items must be tuples of [text, span]".to_string(),
+                ));
+            };
+
+            let text = tuple
+                .get(0)
+                .ok_or_else(|| SpreadSheetError::new("header tuple missing text field".to_string()))?
+                .as_str();
+
+            let span = tuple
+                .get(1)
+                .ok_or_else(|| SpreadSheetError::new("header tuple missing span field".to_string()))?
+                .as_f64() as u16;
+
+            let span = span.max(1);
+
+              cells.push(RowItem::Cell(Cell {
+                cell_type: crate::engine::ast::CellType::Str,
+                value: Expr::Primary(Expression::Value(Value::String(text))),
+                format: for_each_header.format,
+                colspan: span,
+                rowspan: 1,
+                image_mode: None,
+            }));
+        }
+
+        let row = Row { cells };
+        processor.process(&Element::Row(row))?;
+
         Ok(())
     }
 

@@ -47,6 +47,12 @@ pub struct Row<'a> {
     pub cells: Vec<RowItem<'a>>,
 }
 
+#[derive(Debug)]
+pub struct ForEachHeader<'a> {
+    pub variable: &'a str,
+    pub format: Option<&'a str>,
+}
+
 #[derive(Debug, Copy, Clone)]
 pub enum CellType {
     Num,
@@ -85,6 +91,7 @@ pub enum Element<'a> {
     Autofit(Autofit),
     Column(Column<'a>),
     RowSpec(RowSpec<'a>),
+    ForEachHeader(ForEachHeader<'a>),
 }
 
 #[derive(Debug)]

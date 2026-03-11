@@ -52,6 +52,9 @@ impl CsvWriter {
                     self.writer.write_field(cell.value.as_str())?;
                 }
             }
+            for _ in 1..cell.colspan {
+                self.writer.write_field("")?;
+            }
         }
 
         self.writer.write_record(None::<&[u8]>)?;
