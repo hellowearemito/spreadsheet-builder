@@ -34,6 +34,7 @@ impl CsvWriter {
             let cell = match item {
                 RowItem::Cell(cell) => cell,
                 RowItem::ForEachCell(_) => continue,
+                RowItem::ForEachHeader(_) => continue,
             };
             match cell.cell_type {
                 CellType::Num => {
@@ -51,6 +52,9 @@ impl CsvWriter {
                 CellType::Bool => {
                     self.writer.write_field(cell.value.as_str())?;
                 }
+            }
+            for _ in 1..cell.colspan {
+                self.writer.write_field("")?;
             }
         }
 

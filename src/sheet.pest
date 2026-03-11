@@ -65,13 +65,13 @@ width_unit = @{ ( "chars" | "pixels" ) }
 column = { "col" ~ "(" ~ number ~ "," ~ number ~ "," ~ width_unit ~ "(" ~ number ~ ")" ~ ")" }
 rowspec = { "row" ~ "(" ~ number ~ "," ~ width_unit ~ "(" ~ number ~ ")" ~ ")" }
 
-body = _{ (for_loop | anchor | mover | cr | autofit | column | row | rowspec | if_statement)* }
+body = _{ (for_loop | anchor | mover | cr | autofit | column | row | rowspec | if_statement| for_each_header)* }
 
 for_each_cell = { "for" ~ variable_identifier ~ "in" ~ expression ~ "{" ~ cell ~ "}" }
 
 row = { "[" ~ row_item ~ ("," ~ row_item)* ~ "]" }
 
-row_item = _{ for_each_cell | cell }
+row_item = _{ for_each_cell | for_each_header | cell }
 
 cell_type = { ("num" | "str" | "date" | "img") }
 
@@ -83,6 +83,8 @@ image_mode = @{ ( "embed" | "insert" ) }
 cell = { cell_type ~ "(" ~ expr ~ ("," ~ format_identifier)? ~ ("," ~ image_mode)? ~ colspan? ~ rowspan? ~ ")" }
 
 for_loop = { "for" ~ variable_identifier ~ "in" ~ expression ~ "{" ~ body ~ "}" }
+
+for_each_header = { "header" ~ "(" ~ variable_identifier ~ ("," ~ format_identifier)? ~ ")" }
 
 compare_op = { "==" | "!=" | "<=" | ">=" | "<" | ">" }
 

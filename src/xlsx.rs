@@ -126,6 +126,7 @@ impl XlsxWriter {
                 let cell = match item {
                     RowItem::Cell(cell) => cell,
                     RowItem::ForEachCell(_) => continue,
+                    RowItem::ForEachHeader(_) => continue,
                 };
 
                 let format = if let Some(f) = cell.format {

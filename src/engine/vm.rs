@@ -1,5 +1,6 @@
 use crate::engine::ast::{
-    Cell, CompareOp, Condition, Element, Expr, Expression, ForLoop, Format, IfStatement, Modifier, Operator, Row, RowItem
+    Cell, CompareOp, Condition, Element, Expr, Expression, ForEachHeader, ForLoop, Format,
+    IfStatement, Modifier, Operator, Row, RowItem,
 };
 use crate::engine::diag::SpreadSheetError;
 use crate::engine::scope::{Scopes, Value};
@@ -41,6 +42,9 @@ impl VM {
                 }
                 Element::IfStatement(if_statement) => {
                     self.if_statement(if_statement, processor)?;
+                }
+                Element::ForEachHeader(for_each_header) => {
+                    self.for_each_header(for_each_header, processor)?;
                 }
                 _ => {
                     processor.process(item)?;
@@ -87,6 +91,16 @@ impl VM {
         Ok(())
     }
 
+    pub fn for_each_header(
+        &mut self,
+        for_each_header: &ForEachHeader,
+        processor: &mut impl SheetProcessor,
+    ) -> Result<(), SpreadSheetError> {
+        let cells = self.resolve_for_each_header(for_each_header)?;
+        processor.process(&Element::Row(Row { cells }))?;
+        Ok(())
+    }
+
     pub fn eval_condition(&self, condition: &Condition) -> Result<bool, SpreadSheetError> {
         let lhs = self.resolve_expr(&condition.lhs)?;
 
@@ -95,10 +109,10 @@ impl VM {
             Some((op, rhs_expr)) => {
                 let rhs = self.resolve_expr(rhs_expr)?;
                 let result = match op {
-                    CompareOp::Eq  => lhs.eq(&rhs),
+                    CompareOp::Eq => lhs.eq(&rhs),
                     CompareOp::Neq => !lhs.eq(&rhs),
-                    CompareOp::Lt  => lhs.lt(&rhs),
-                    CompareOp::Gt  => lhs.gt(&rhs),
+                    CompareOp::Lt => lhs.lt(&rhs),
+                    CompareOp::Gt => lhs.gt(&rhs),
                     CompareOp::Lte => lhs.lt(&rhs) || lhs.eq(&rhs),
                     CompareOp::Gte => lhs.gt(&rhs) || lhs.eq(&rhs),
                 };
@@ -206,6 +220,10 @@ impl VM {
                         }
                     }
                 }
+                RowItem::ForEachHeader(for_each_header) => {
+                    let mut resolved = self.resolve_for_each_header(for_each_header)?;
+                    cells.append(&mut resolved);
+                }
             }
         }
         Ok(Row { cells })
@@ -224,5 +242,63 @@ impl VM {
             identifier: format.identifier,
             modifiers,
         })
+    }
+
+    fn resolve_for_each_header<'b>(
+        &self,
+        for_each_header: &'b ForEachHeader,
+    ) -> Result<Vec<RowItem<'b>>, SpreadSheetError> {
+        let value = self
+            .scopes
+            .resolve_identifier(for_each_header.variable)
+            .cloned()
+            .ok_or_else(|| {
+                SpreadSheetError::new(format!(
+                    "Unresolved identifier: {}",
+                    for_each_header.variable
+                ))
+            })?;
+
+        let Value::Array(arr) = value else {
+            return Err(SpreadSheetError::new(format!(
+                "header() variable must be an array, got: {}",
+                for_each_header.variable
+            )));
+        };
+
+        let mut cells = Vec::new();
+        for item in arr.iter() {
+            let Value::Array(tuple) = item else {
+                return Err(SpreadSheetError::new(
+                    "header() array items must be tuples of [text, span]".to_string(),
+                ));
+            };
+            let text = tuple.first()
+                .ok_or_else(|| {
+                    SpreadSheetError::new("header tuple missing text field".to_string())
+                })?
+                .as_str();
+            let span_value = tuple.get(1).ok_or_else(|| {
+                SpreadSheetError::new("header tuple missing span field".to_string())
+            })?;
+            let span: u16 = match span_value {
+                Value::Integer(n) => (*n as u16).max(1),
+                other => {
+                    return Err(SpreadSheetError::new(format!(
+                        "header tuple span must be an integer, got: {:?}",
+                        other
+                    )))
+                }
+            };
+            cells.push(RowItem::Cell(Cell {
+                cell_type: crate::engine::ast::CellType::Str,
+                value: Expr::Primary(Expression::Value(Value::String(text))),
+                format: for_each_header.format,
+                colspan: span,
+                rowspan: 1,
+                image_mode: None,
+            }));
+        }
+        Ok(cells)
     }
 }

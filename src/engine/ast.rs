@@ -40,11 +40,18 @@ pub struct ForEachCell<'a> {
 pub enum RowItem<'a> {
     Cell(Cell<'a>),
     ForEachCell(ForEachCell<'a>),
+    ForEachHeader(ForEachHeader<'a>),
 }
 
 #[derive(Debug)]
 pub struct Row<'a> {
     pub cells: Vec<RowItem<'a>>,
+}
+
+#[derive(Debug)]
+pub struct ForEachHeader<'a> {
+    pub variable: &'a str,
+    pub format: Option<&'a str>,
 }
 
 #[derive(Debug, Copy, Clone)]
@@ -85,6 +92,7 @@ pub enum Element<'a> {
     Autofit(Autofit),
     Column(Column<'a>),
     RowSpec(RowSpec<'a>),
+    ForEachHeader(ForEachHeader<'a>),
 }
 
 #[derive(Debug)]

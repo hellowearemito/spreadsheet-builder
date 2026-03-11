@@ -265,3 +265,6 @@ for $user in $users {
 sheet("third")
 
 [ str("Start"), for $val in $arr { str($val) }, str("End") ]
+
+[ str("headers"), header($headers, :gray)]
+[ str(""), str("Alice"), str("Smith"), num(95), num(87), num(91), str("Good") ]

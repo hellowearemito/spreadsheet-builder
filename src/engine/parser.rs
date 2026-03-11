@@ -75,6 +75,10 @@ fn parse_element(pair: Pair<Rule>) -> Option<Element> {
             let if_statement = parse_if_statement(pair.into_inner());
             Some(Element::IfStatement(if_statement))
         }
+        Rule::for_each_header => {
+            let header = parse_for_each_header(pair.into_inner());
+            Some(Element::ForEachHeader(header))
+        }
         _ => None,
     }
 }
@@ -109,7 +113,12 @@ fn parse_for_loop(pairs: pest::iterators::Pairs<Rule>) -> ForLoop {
 fn parse_if_statement(pairs: pest::iterators::Pairs<Rule>) -> IfStatement {
     let mut pairs = pairs;
 
-    let condition = parse_condition(pairs.next().expect("grammar should guarantee pair").into_inner());
+    let condition = parse_condition(
+        pairs
+            .next()
+            .expect("grammar should guarantee pair")
+            .into_inner(),
+    );
 
     let mut true_elements = Vec::new();
     let mut false_elements = Vec::new();
@@ -132,14 +141,20 @@ fn parse_if_statement(pairs: pest::iterators::Pairs<Rule>) -> IfStatement {
         }
     }
 
-    IfStatement { condition, true_elements, false_elements }
+    IfStatement {
+        condition,
+        true_elements,
+        false_elements,
+    }
 }
 
 fn parse_condition(pairs: pest::iterators::Pairs<Rule>) -> Condition {
     let pratt = make_pratt();
     let mut pairs = pairs;
 
-    let lhs_pair = pairs.next().expect("grammar should guarantee at least one pair");
+    let lhs_pair = pairs
+        .next()
+        .expect("grammar should guarantee at least one pair");
     let lhs = parse_expr(lhs_pair.into_inner(), &pratt);
 
     let op = if let Some(op_pair) = pairs.next() {
@@ -149,11 +164,13 @@ fn parse_condition(pairs: pest::iterators::Pairs<Rule>) -> Condition {
                 "!=" => CompareOp::Neq,
                 "<=" => CompareOp::Lte,
                 ">=" => CompareOp::Gte,
-                "<"  => CompareOp::Lt,
-                ">"  => CompareOp::Gt,
-                _    => unreachable!(),
+                "<" => CompareOp::Lt,
+                ">" => CompareOp::Gt,
+                _ => unreachable!(),
             };
-            let rhs_pair = pairs.next().expect("grammar should guarantee pair after op");
+            let rhs_pair = pairs
+                .next()
+                .expect("grammar should guarantee pair after op");
             let rhs = parse_expr(rhs_pair.into_inner(), &pratt);
             Some((cmp, rhs))
         } else {
@@ -480,6 +497,11 @@ fn parse_row(pairs: pest::iterators::Pairs<Rule>) -> Row {
             Rule::for_each_cell => {
                 cells.push(RowItem::ForEachCell(parse_for_each_cell(pair.into_inner())));
             }
+            Rule::for_each_header => {
+                cells.push(RowItem::ForEachHeader(parse_for_each_header(
+                    pair.into_inner(),
+                )));
+            }
             _ => {}
         }
     }
@@ -518,4 +540,17 @@ fn parse_for_each_cell(pairs: pest::iterators::Pairs<Rule>) -> ForEachCell {
         expression,
         cell,
     }
+}
+
+fn parse_for_each_header(pairs: pest::iterators::Pairs<Rule>) -> ForEachHeader {
+    let mut variable = "";
+    let mut format = None;
+    for pair in pairs {
+        match pair.as_rule() {
+            Rule::variable_identifier => variable = pair.as_str(),
+            Rule::format_identifier => format = Some(pair.as_str()),
+            _ => {}
+        }
+    }
+    ForEachHeader { variable, format }
 }
