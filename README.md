@@ -1,50 +1,68 @@
 # spreadsheet-builder
-A simple spreadsheet builder tool
 
-This template language is designed to generate xlsx spreadsheets effectively. 
-The underlying library is the rust_xlsxwriter library 
+A simple spreadsheet builder tool.
 
-The template has two sections. First, you define cell formats like:
+This template language is designed to generate XLSX spreadsheets effectively. The underlying library is **rust_xlsxwriter**.
+
+---
+
+## Template structure
+
+The template has two main sections:
+
+1. **Format definitions**  
+2. **Sheet & content definitions**
+
+---
+
+## 1. Format definitions
+
+You can define reusable cell formats:
 
 ```
 :header {
   border("thin"),
   border_bottom_color("#000000"),
   background_color("#eeeeee")
-}  
+}
 ```
 
-Format identifiers always begin with : followed by US-ASCII letters, digits or underscore.
+Format identifiers:
 
-Handled formats:
+- Must start with `:`  
+- Can contain: a-z, A-Z, 0-9, _
 
-- bold
-- italic
-- underline
-- strikethrough
-- super
-- sub
-- num(“<format>”) 
-- align(“left”) - or right, center, verticalcenter, top, bottom
-- indent(1)
-- font\_name(“<name>”)
-- font\_size(12)
-- color(“#<hexa>”)
-- background\_color(“#<hexa>”)
-- border(“thin”)   - or medium, dashed, dotted, thick, double, hair, medium\_dashed, dash\_dot, medium\_dash\_dot, dash\_dot\_dot, medium\_dash\_dot\_dot, slant\_dash\_dot
-- border\_top(..)
-- border\_bottom(..)
-- border\_left(..)
-- border\_right(..)
-- border\_color(“#<hexa>”)
-- border\_top\_color(..)
-- border\_bottom\_color(..)
-- border\_left\_color(..)
-- border\_right\_color(..)
+**Supported format properties:**
 
-Dates are numbers in Excel, so their formatting is handled by the num() format as well.
+- `bold`  
+- `italic`  
+- `underline`  
+- `strikethrough`  
+- `super`  
+- `sub`  
+- `num("")`  
+- `align("left")`  // left, right, center, verticalcenter, top, bottom  
+- `indent(1)`  
+- `font_name("")`  
+- `font_size(12)`  
+- `color("#")`  
+- `background_color("#")`  
+- `border("thin")` // medium, dashed, dotted, thick, double, hair, etc.  
+- `border_top(...)`  
+- `border_bottom(...)`  
+- `border_left(...)`  
+- `border_right(...)`  
+- `border_color("#")`  
+- `border_top_color(...)`  
+- `border_bottom_color(...)`  
+- `border_left_color(...)`  
+- `border_right_color(...)`
 
-In the second section, you define the sheets:
+**Note:** Dates are stored as numbers in Excel → use `num()` formatting for display.
+
+---
+
+## 2. Sheet & content definition
 
 ```
 sheet("Data")
@@ -52,92 +70,286 @@ row(0, pixels(75))
 col(0, 0, pixels(186))
 ```
 
-The sheet() starts a new WorkSheet. The row() sets the height of a row (either in pixels or in chars).
+- `sheet()` → starts a new worksheet  
+- `row()` → sets row height  
+- `col()` → sets column width  
 
-The col() sets the width for a range of columns (either in pixels or in chars).
+---
 
-This snippet generates two rows and cells into them (starting at the current cursor position):
+## Cells & content
 
+Example:
 
 ```
-[ 
-  img("images/alc-logo.png", :border, embed), 
-  str($report_data.title, :maintitle, colspan(8)), 
-  str($report_data.username, :right, colspan(2)) 
-]
-[ 
-  str(""), 
-  str($report_data.jurisdiction, :center, colspan(8)), 
-  str($report_data.module, :right, colspan(2)) 
+[
+  img("images/alc-logo.png", :border, embed),
+  str($report_data.title, :maintitle, colspan(8)),
+  str($report_data.username, :right, colspan(2))
 ]
 ```
 
-The img() type inserts an image into the cell, optionally applies a format on the cell. The image placement may be embed or insert. The first one fits the image inside the cell, the second one allows it to overflow multiple cells.
+Supported cell types:
 
-The str() creates a cell with string content, the num() with numeric content and the date() with date content. Dates are actually numbers in Excel, the date() call converts an ISO 8601 timestamp string into an Excel number.
+- `str()` → string  
+- `num()` → number  
+- `date()` → ISO → Excel date  
+- `img()` → image  
 
-The colspan() and rowspan() modifiers set the cell merging properties.
+**Image modes:**
 
-You can use the passed variables like this:
+- `embed` → fits inside cell  
+- `insert` → may overflow cells  
 
-```
-[ str("Game:", :header), str($instant_game.game) ]
-```
+**Merging:**
 
-or like this:
+- `colspan(n)`  
+- `rowspan(n)`  
+
+---
+
+## Variables & loops
+
+You can iterate over arrays:
 
 ```
 for $prize in $prize_levels {
   [
     str($prize.prize_level_no),
     str($prize.description),
-    str($prize.prize_code),
-    num($prize.amount),
-    num($prize.free_ticket, :int),
-    str($prize.merch_prize),
-    num($prize.prize_value),
-    num($prize.wins, :int),
-    num($prize.percent_of_sale)
+    num($prize.amount)
   ]
 }
 ```
 
-The expression language may be improved in the feature if necessary.
+---
 
-For movement of the cursor you can use two statements: anchor and move
+## Horizontal for loops
+
+Generate multiple cells within a single row:
+
+```
+[ str("Start"), for $val in $arr { str($val) }, str("End") ]
+```
+
+Expands into:
+
+```
+Start | val1 | val2 | val3 | End
+```
+
+**Multiple loops in one row:**
+
+```
+[
+  for $val in $arr { str($val) },
+  for $other in $otherArr { str($other) }
+]
+```
+
+- Each loop expands independently  
+- Final row concatenates all generated cells  
+
+**Notes:**
+
+- Works only at row level  
+- Ideal for dynamic column generation  
+- Fully compatible with other expressions  
+
+---
+
+## header() – Dynamic merged headers
+
+Designed for dynamic column layouts (especially XLSX).
+
+**Input format:**
+
+```
+$headers = [
+  ["Name", 2],
+  ["Score", 3],
+  ["Notes", 1]
+]
+```
+
+- `String` → label  
+- `usize` → number of columns to span  
+
+**Usage:**
+
+```
+header($headers, :gray)
+```
+
+**XLSX behavior:**
+
+- Cells are merged horizontally  
+- Format applied to merged region  
+
+**CSV behavior:**
+
+```
+Name,,Score,,,Notes
+```
+
+- No merge support → padded with empty cells  
+- Keeps column count consistent  
+
+**Inline usage:**
+
+```
+[ str("hello"), header($headers, :gray) ]
+```
+
+---
+
+## Conditional blocks (if)
+
+```
+if $show_header {
+  [
+    str("Header1"),
+    str("Header2")
+  ]
+}
+```
+
+**Optional else:**
+
+```
+if $cond {
+  [ ... ]
+} else {
+  [ ... ]
+}
+```
+
+Else is optional.
+
+---
+
+## Conditions (extended)
+
+**Supported operators:**
+
+```
+==  !=  <  >  <=  >=
+```
+
+**Supported types:**
+
+- string  
+- integer  
+- float  
+
+**Examples:**
+
+```
+if $myinteger == 3
+if $myinteger < 5
+if $myfloat == 5.0
+if $mystring == "abc"
+if $mystring < $mystring2   // lexicographical
+```
+
+**Important:**
+
+- Type mismatch → evaluates to false  
+
+---
+
+## Cursor control
 
 ```
 anchor(@top)
-```
-
-remembers the current position, named as @top. Anchor names always start with a @ follow by US-ASCII letters, digits or underscore.
-
-
-```
 move(@top, 0, 3)
-```
-
-moves the cursor to a position 0 rows below @top and 3 columns right.
-
-You can move relative to the current position too:
-
-
-```
 move(0, 3)
-```
-
-To return to the beginning of a row, use
-
-```
 cr
 ```
 
-There is an 
+- `anchor()` → save position  
+- `move()` → jump relative or absolute  
+- `cr` → move to beginning of row  
+
+---
+
+## Autofit
 
 ```
 autofit
 ```
 
-command to automatically set the width of the columns based on their content but this is not 100% reliable, setting explicit column width is preferred.
+- Attempts automatic column sizing  
+- Not always reliable → prefer explicit widths  
 
+---
 
+## Notes & limitations
+
+**CSV:**
+
+- No merge support  
+- No styling  
+
+- Each row must have consistent number of columns  
+- Horizontal expansion (loops, header) helps maintain this dynamically  
+
+---
+
+## Full example template
+
+```
+:header {
+  bold,
+  background_color("#cccccc"),
+  align("center")
+}
+
+:gray {
+  background_color("#eeeeee")
+}
+
+sheet("Report")
+row(0, pixels(30))
+
+$headers = [
+  ["Name", 2],
+  ["Score", 3],
+  ["Notes", 1]
+]
+
+[ header($headers, :gray) ]
+
+for $student in $students {
+  [
+    str($student.first_name),
+    str($student.last_name),
+    for $score in $student.scores { num($score) },
+    str($student.note)
+  ]
+}
+
+if $show_summary {
+  [
+    str("Average", :header),
+    "",
+    for $col_avg in $averages { num($col_avg) },
+    ""
+  ]
+}
+```
+
+- Dynamic headers (`header`)  
+- Horizontal loop for scores  
+- Conditional summary row  
+
+---
+
+## Best Practices
+
+- Always define formats for merged/important cells    
+- Ensure consistent column count per row → avoids broken CSV/XLSX  
+- Use anchors and move for complex layouts → easier to maintain  
+- Prefer explicit column widths over autofit → more predictable output  
+- Use `header()` in CSV cautiously → merges are simulated via empty cells  
+- Type consistency in conditions → mismatched types evaluate to false  
+- Combine loops and if for compact dynamic tables
