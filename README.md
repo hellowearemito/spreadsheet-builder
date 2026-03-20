@@ -15,11 +15,11 @@ The template has two main sections:
 
 ---
 
-## 1. Formats
+## 1. Format definitions
 
 You can define reusable cell formats:
 
-```rust
+```
 :header {
   border("thin"),
   border_bottom_color("#000000"),
@@ -62,9 +62,9 @@ Format identifiers:
 
 ---
 
-## 2. Sheets & layout
+## 2. Sheet & content definition
 
-```rust
+```
 sheet("Data")
 row(0, pixels(75))
 col(0, 0, pixels(186))
@@ -80,7 +80,7 @@ col(0, 0, pixels(186))
 
 Example:
 
-```rust
+```
 [
   img("images/alc-logo.png", :border, embed),
   str($report_data.title, :maintitle, colspan(8)),
@@ -111,7 +111,7 @@ Supported cell types:
 
 You can iterate over arrays:
 
-```rust
+```
 for $prize in $prize_levels {
   [
     str($prize.prize_level_no),
@@ -127,7 +127,7 @@ for $prize in $prize_levels {
 
 Generate multiple cells within a single row:
 
-```rust
+```
 [ str("Start"), for $val in $arr { str($val) }, str("End") ]
 ```
 
@@ -139,7 +139,7 @@ Start | val1 | val2 | val3 | End
 
 **Multiple loops in one row:**
 
-```rust
+```
 [
   for $val in $arr { str($val) },
   for $other in $otherArr { str($other) }
@@ -163,7 +163,7 @@ Designed for dynamic column layouts (especially XLSX).
 
 **Input format:**
 
-```rust
+```
 $headers = [
   ["Name", 2],
   ["Score", 3],
@@ -176,7 +176,7 @@ $headers = [
 
 **Usage:**
 
-```rust
+```
 header($headers, :gray)
 ```
 
@@ -196,7 +196,7 @@ Name,,Score,,,Notes
 
 **Inline usage:**
 
-```rust
+```
 [ str("hello"), header($headers, :gray) ]
 ```
 
@@ -204,7 +204,7 @@ Name,,Score,,,Notes
 
 ## Conditional blocks (if)
 
-```rust
+```
 if $show_header {
   [
     str("Header1"),
@@ -215,7 +215,7 @@ if $show_header {
 
 **Optional else:**
 
-```rust
+```
 if $cond {
   [ ... ]
 } else {
@@ -243,7 +243,7 @@ Else is optional.
 
 **Examples:**
 
-```rust
+```
 if $myinteger == 3
 if $myinteger < 5
 if $myfloat == 5.0
@@ -259,7 +259,7 @@ if $mystring < $mystring2   // lexicographical
 
 ## Cursor control
 
-```rust
+```
 anchor(@top)
 move(@top, 0, 3)
 move(0, 3)
@@ -274,12 +274,12 @@ cr
 
 ## Autofit
 
-```rust
+```
 autofit
 ```
 
 - Attempts automatic column sizing  
-- ⚠️ Not always reliable → prefer explicit widths  
+- Not always reliable → prefer explicit widths  
 
 ---
 
@@ -297,7 +297,7 @@ autofit
 
 ## Full example template
 
-```rust
+```
 :header {
   bold,
   background_color("#cccccc"),
